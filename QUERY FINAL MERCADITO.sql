@@ -110,6 +110,64 @@ select * from paquete_vehiculo
 -- Paquete_vehiculo se llena dinamicamente
 --Paquete se llena dinamicamente
 
+
+		-- Mayid
+
+	    --Selects
+		--Cliente especifico
+		 Select * from cliente
+		  where apellido like 'A%'
+		  and   telefono='8954-2003'
+		  and direccion like 'T%'
+
+		--Chofer especifico
+		 Select * from chofer
+		 where cedulaChofer=100056789
+		 and telefonoChofer like '%75' 
+		 and apellidoChofer like 'R%'
+
+		  --Codigo de producto asociado al cliente que lo compró
+		  select b.codigoProducto,a.* 
+		  from cliente a, cliente_producto b
+		  where a.cedula=b.cedula
+
+		  --Cedula ,Nombre y apellidos del chofer con el vehiculo que maneja
+		  select a.cedulaChofer, CONCAT(a.nombreChofer,a.apellidoChofer) as Nombre_Completo,
+		  b.placa
+		  from chofer a, chofer_vehiculo b
+		  where b.cedulaChofer=a.cedulaChofer
+
+		  --Mostrar Cedula del chofer e identificacion, dependiendo del modelo de vehiculo
+		  select a.cedulaChofer,CASE b.modeloVehiculo
+								WHEN 'Camioneta' THEN a.nombreChofer+' '+a.apellidoChofer
+								ELSE a.cedulaChofer
+							  END AS 'Identificacion'
+		  from chofer a, vehiculo b, chofer_vehiculo c
+		  where a.cedulaChofer=c.cedulaChofer
+		  and c.placa=b.placa
+
+		--Updates
+		--Aumentar el precio de los productos en un 10%
+		update producto
+		set precioProducto= precioProducto*1.10;
+
+		--Disminuir el precio de los productos en un 10%
+		update producto
+		set precioProducto= precioProducto-((precioProducto*10)/100);
+
+		--Modificar modelo del vehiculo
+		update vehiculo
+		set modeloVehiculo='BMW'
+		where placa like 'AB%'
+
+		--Delete
+		delete producto where codigoProducto=100;
+
+		delete cliente where cedula like '11%';
+
+		delete vehiculo where placa like 'AB%';
+
+
 		--Clientes
 
 		--Insertar un cliente nuevo
@@ -801,5 +859,18 @@ select * from paquete_vehiculo
 			set @ced=117550809 
 			exec borrarPaquete @ced, @mens output
 			select* from paquete
+
+
+	
+		--Borrar en cascada las Tablas
+		drop table cliente_producto
+		drop table paquete_vehiculo;
+		drop table chofer_vehiculo;
+		drop table producto;
+		drop table factura;
+		drop table paquete;
+		drop table cliente;
+		drop table chofer;
+		drop table vehiculo;
 
 
