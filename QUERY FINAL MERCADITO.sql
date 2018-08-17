@@ -1,5 +1,26 @@
 create database elMercadito
 
+CREATE DATABASE elMercadito
+ON
+PRIMARY(
+	NAME = elMercadito,
+	FILENAME = 'C:\BDMercadito\elMercadito_PRIMARY.MDF',
+	SIZE = 64,
+	MAXSIZE = 5120,
+	FILEGROWTH = 128),
+FILEGROUP FG_HOTEL(
+	NAME = DATA1,
+	FILENAME = 'C:\BDMercadito\elMercadito_DATA1.NFD',
+	SIZE = 64,
+	MAXSIZE = 5120,
+	FILEGROWTH = 128)
+LOG ON(
+	NAME = LOG1,
+	FILENAME = 'C:\BDMercadito\elMercadito_LOG1.LFD',
+	SIZE = 64,
+	MAXSIZE = 1024,
+	FILEGROWTH = 128)
+
 use elMercadito
 
 create table cliente(
