@@ -1,5 +1,26 @@
 create database elMercadito
 
+CREATE DATABASE elMercadito
+ON
+PRIMARY(
+	NAME = elMercadito,
+	FILENAME = 'C:\BDMercadito\elMercadito_PRIMARY.MDF',
+	SIZE = 64,
+	MAXSIZE = 5120,
+	FILEGROWTH = 128),
+FILEGROUP FG_HOTEL(
+	NAME = DATA1,
+	FILENAME = 'C:\BDMercadito\elMercadito_DATA1.NFD',
+	SIZE = 64,
+	MAXSIZE = 5120,
+	FILEGROWTH = 128)
+LOG ON(
+	NAME = LOG1,
+	FILENAME = 'C:\BDMercadito\elMercadito_LOG1.LFD',
+	SIZE = 64,
+	MAXSIZE = 1024,
+	FILEGROWTH = 128)
+
 use elMercadito
 
 create table cliente(
@@ -110,6 +131,64 @@ select * from paquete_vehiculo
 -- Paquete_vehiculo se llena dinamicamente
 --Paquete se llena dinamicamente
 
+
+		-- Mayid
+
+	    --Selects
+		--Cliente especifico
+		 Select * from cliente
+		  where apellido like 'A%'
+		  and   telefono='8954-2003'
+		  and direccion like 'T%'
+
+		--Chofer especifico
+		 Select * from chofer
+		 where cedulaChofer=100056789
+		 and telefonoChofer like '%75' 
+		 and apellidoChofer like 'R%'
+
+		  --Codigo de producto asociado al cliente que lo compró
+		  select b.codigoProducto,a.* 
+		  from cliente a, cliente_producto b
+		  where a.cedula=b.cedula
+
+		  --Cedula ,Nombre y apellidos del chofer con el vehiculo que maneja
+		  select a.cedulaChofer, CONCAT(a.nombreChofer,a.apellidoChofer) as Nombre_Completo,
+		  b.placa
+		  from chofer a, chofer_vehiculo b
+		  where b.cedulaChofer=a.cedulaChofer
+
+		  --Mostrar Cedula del chofer e identificacion, dependiendo del modelo de vehiculo
+		  select a.cedulaChofer,CASE b.modeloVehiculo
+								WHEN 'Camioneta' THEN a.nombreChofer+' '+a.apellidoChofer
+								ELSE a.cedulaChofer
+							  END AS 'Identificacion'
+		  from chofer a, vehiculo b, chofer_vehiculo c
+		  where a.cedulaChofer=c.cedulaChofer
+		  and c.placa=b.placa
+
+		--Updates
+		--Aumentar el precio de los productos en un 10%
+		update producto
+		set precioProducto= precioProducto*1.10;
+
+		--Disminuir el precio de los productos en un 10%
+		update producto
+		set precioProducto= precioProducto-((precioProducto*10)/100);
+
+		--Modificar modelo del vehiculo
+		update vehiculo
+		set modeloVehiculo='BMW'
+		where placa like 'AB%'
+
+		--Delete
+		delete producto where codigoProducto=100;
+
+		delete cliente where cedula like '11%';
+
+		delete vehiculo where placa like 'AB%';
+
+
 		--Clientes
 
 		--Insertar un cliente nuevo
@@ -131,7 +210,7 @@ select * from paquete_vehiculo
 
 		declare @ced int, @nom varchar(30), @apellido varchar(30),
 		 @emailCli varchar(30), @tel varchar(30), @dir varchar(30), @mensj varchar(50)
-		 set @ced=117550809 set @nom='Ignacio' set @apellido='Araya' set @emailCli='igaraya@outlook.com' set @tel='8910-7689' set @dir='Chepe'
+		 set @ced=1175508090 set @nom='Bombon' set @apellido='Calvo' set @emailCli='bombon@outlook.com' set @tel='8910-0000' set @dir='Paris'
 		 execute creaCliente @ced, @nom,  @apellido,@emailCli, @tel, @dir, @mensj output
 		 select @mensj
 		 select * from cliente
@@ -169,7 +248,7 @@ select * from paquete_vehiculo
 		go
 
 		declare @ced int, @mensj varchar(50)
-		set @ced=117550800
+		set @ced=117550809
 		execute verCliente @ced, @mensj output
 		select @mensj
 
@@ -631,7 +710,7 @@ select * from paquete_vehiculo
 		 go
 
 		 declare @ced int, @plac varchar(50), @mensj varchar(50)
-		 set @ced=654326359 set @plac='AAC-269'
+		 set @ced=100056789 set @plac='AAC-269'
 		 exec asignaVehiculo @ced, @plac, @mensj output
 		 select @mensj
 		 select * from chofer
@@ -669,7 +748,7 @@ select * from paquete_vehiculo
 
 		--Generar tabla Factura con todos los datos hasta el momento
 
-		create proc verFactura
+		alter proc verFactura
 		as
 		declare @nombreFac varchar(50),
 		@costoFac money,
@@ -695,10 +774,14 @@ select * from paquete_vehiculo
 
 			close cursor_factura
 			deallocate cursor_factura
+			exec('delete cliente_producto')
 			go
 
 			exec verFactura
 			select * from factura
+			select * from cliente_producto
+			delete factura
+	
 
 			--Ver factura de un cliente
 
@@ -801,5 +884,18 @@ select * from paquete_vehiculo
 			set @ced=117550809 
 			exec borrarPaquete @ced, @mens output
 			select* from paquete
+
+
+	
+		--Borrar en cascada las Tablas
+		drop table cliente_producto
+		drop table paquete_vehiculo;
+		drop table chofer_vehiculo;
+		drop table producto;
+		drop table factura;
+		drop table paquete;
+		drop table cliente;
+		drop table chofer;
+		drop table vehiculo;
 
 
